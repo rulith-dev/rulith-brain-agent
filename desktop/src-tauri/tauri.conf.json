@@ -1,0 +1,68 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Rulith Brain Agent",
+  "version": "../../package.json",
+  "identifier": "ai.rulith.brain.agent",
+  "mainBinaryName": "rulith-brain-agent",
+  "build": {
+    "frontendDist": "../ui"
+  },
+  "app": {
+    "windows": [],
+    "security": {
+      "csp": {
+        "default-src": "'self'",
+        "connect-src": "'self' ipc: http://ipc.localhost",
+        "img-src": "'self' data:",
+        "style-src": "'self' 'unsafe-inline'",
+        "script-src": "'self'"
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "nsis"
+    ],
+    "publisher": "Rulith",
+    "copyright": "Copyright (c) 2026 Victor Shaw",
+    "category": "Productivity",
+    "shortDescription": "Rulith Brain Agent",
+    "longDescription": "The companion agent of Rulith Brain, in a window of its own",
+    "createUpdaterArtifacts": false,
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper",
+        "silent": true
+      },
+      "nsis": {
+        "installMode": "currentUser",
+        "installerHooks": "./windows/agent-hooks.nsh",
+        "languages": [
+          "English",
+          "SimpChinese"
+        ],
+        "displayLanguageSelector": false,
+        "installerIcon": "icons/icon.ico"
+      }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IERFMkE2RDUyNTQ0MzUzREUKUldUZVUwTlVVbTBxM2tJM2xLUmJjS2pxM3BQU1lTZ2t3REtuZjQ2Q1JXMHh2YTNFZk1xUHpORHMK",
+      "endpoints": [
+        "https://github.com/rulith-dev/rulith-brain-agent/releases/latest/download/latest.json",
+        "https://gh-proxy.com/https://github.com/rulith-dev/rulith-brain-agent/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
+}

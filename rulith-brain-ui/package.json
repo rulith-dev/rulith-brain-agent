@@ -1,0 +1,20 @@
+{
+  "name": "rulith-brain-ui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Web interface branding for the Rulith Brain Agent.",
+  "license": "MIT",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "client": {
+      "inject": ["@deepseek-ai/dsh-client-ui-renderer", "@deepseek-ai/dsh-client-ui-sidebar"],
+      "platform": "web"
+    }
+  }
+}

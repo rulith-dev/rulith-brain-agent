@@ -1,0 +1,165 @@
+# Rulith Brain Agent: dsh's web profile (dsh 0.2.1-alpha.1) talking to a Rulith Inference server in memory mode.
+# The server keeps the conversation as one long memory; dsh keeps its own transcript for the page only. One agent, one
+# turn after another: no compaction (the memory lets old material go by itself when full), no subagents, no scheduled runs, no title requests
+# (every model request becomes part of the memory). dsh's local tools stay.
+# Values come from the launcher's environment (start.mjs), which also runs the forwarder that turns dsh's requests into
+# memory turns (memory-transport.mjs); nothing secret is written here.
+
+# one model: the memory server's
+- id: ui-settings-models
+  disabled: true
+- id: ui-model-selection
+  disabled: true
+- id: subagent-model-selection-settings
+  disabled: true
+- id: agent-default-model
+  config:
+    provider: rulith-memory
+    model: !!js process.env.RULITH_MEMORY_MODEL
+- id: llm-pi-ai
+  config:
+    providers:
+      rulith-memory:
+        api: openai-completions
+        # the launcher's loopback forwarder (memory-transport.mjs): it sends each request to the memory as one turn
+        baseURL: !!js process.env.RULITH_MEMORY_BASE
+        apiKeyEnv: RULITH_MEMORY_KEY
+        models:
+          - id: !!js process.env.RULITH_MEMORY_MODEL
+            name: !!js process.env.RULITH_MEMORY_MODEL
+            # the memory is far larger than any request: dsh never compacts (and no compaction is mounted anyway). The
+            # page's context meter measures against this figure: what a memory may hold on this computer (the
+            # licence's size - a trial: 10M - no more than the device's estimate; start.mjs), else 100M
+            contextWindow: !!js Number(process.env.RULITH_MEMORY_CONTEXT) || 100000000
+            maxTokens: 32768
+
+# the page carries the product's brand, Rulith Brain Agent (rulith-brain-ui: the mark, the name with dsh's credit, the
+# tab's title and icon) instead of dsh's; the launcher copies the package into the profile at every start
+- id: ui-brand-official
+  disabled: true
+
+# web_search asks the agent's own search provider (rulith-brain-web, loaded below) instead of dsh's, which needs a paid
+# API key of the user's: Wikipedia's own search without an account or a key, or the service the user chose - a SearXNG
+# address of their own (RULITH_BRAIN_SEARCH, else what is set in the Rulith Brain app). web_fetch stays dsh's own. (To use dsh's search with a key of your own, name it here: searchProvider: deepseek-official.)
+# A patch replaces the entry's whole config: both are restated.
+- id: web
+  config:
+    searchProvider: rulith-search
+    fetchProvider: http
+
+- id: web-fetch-http
+  config:
+    maxResponseBytes: 33554432
+    maxBodyChars: 33554432
+    timeoutMs: 60000
+
+# The launcher and the harness use the same private spill root for this run.
+- id: spill-local
+  config:
+    root: !!js process.env.RULITH_BRAIN_SPILL_ROOT
+
+# the model is not told it is "an AI agent powered by DeepSeek Harness" (dsh's identity line): the page names the
+# product and credits dsh. A patch replaces the entry's whole config, so dsh's web values are restated.
+- id: system-prompt
+  config:
+    includeHarnessIdentity: false
+    personaPrefix: You are a coding agent powered by the {{model}} model.
+    personaSuffix: Your working directory is {{cwd}}.
+
+# every model request is a turn of the one memory: no extra requests
+- id: session-title-llm
+  disabled: true
+- id: session-log-deepseek
+  disabled: true
+
+# one agent, one turn after another
+- id: ui-subagent
+  disabled: true
+- id: ui-settings-subagent
+  disabled: true
+- id: ui-schedule
+  disabled: true
+- id: schedule
+  disabled: true
+- id: ui-agent-preset
+  disabled: true
+- id: preset-standard
+  disabled: true
+- id: preset-ptc
+  disabled: true
+- id: preset-cordis
+  disabled: true
+- id: preset-minimal
+  disabled: true
+- id: agent-preset-registry
+  config:
+    default: memory
+
+- insert:
+    # dsh's standard preset without compaction, delegation (subagents, workflows), schedules, goals and plan mode
+    - id: preset-memory
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: memory
+        order: 0
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: >-
+                You are Rulith Brain Agent, a long-running agent powered by the {{model}} model, working through the
+                user's Rulith Brain: you share its one long-term memory. What is said here, in Brain's Chat and in earlier
+                sessions is there for you, and what you do here is there for them later. Everything you read in this
+                session - web pages, files, the results of your tools - becomes part of that memory, so what you read
+                and research now can be drawn on later in any conversation. This is a session of Rulith
+                Brain Agent, an app of its own apart from Brain's Chat window: your tools and your working directory
+                exist only here. What was said in Brain's Chat or by other programs is in your memory as other
+                conversations, in other places, not part of this session.
+              suffix: Your working directory is {{cwd}}.
+          - id: agent-instructions
+            name: '@deepseek-ai/dsh-agent-instructions'
+            config:
+              maxBytes: 65536
+          - id: time-context
+            name: '@deepseek-ai/dsh-time-context'
+          - id: tool-bash
+            name: '@deepseek-ai/dsh-tool-bash'
+            disabled: !!js process.platform === 'win32'
+          - id: tool-pwsh
+            name: '@deepseek-ai/dsh-tool-pwsh'
+            disabled: !!js process.platform !== 'win32'
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+          - id: tool-fs-search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+            config:
+              sampleOverCapGlobResults: false
+          - id: tool-jobs
+            name: '@deepseek-ai/dsh-tool-jobs'
+          - id: skill-filesystem
+            name: '@deepseek-ai/dsh-skill-filesystem'
+          - id: tool-skill
+            name: '@deepseek-ai/dsh-tool-skill'
+          - id: tool-ask-user
+            name: '@deepseek-ai/dsh-tool-ask-user'
+          - id: tool-todo
+            name: '@deepseek-ai/dsh-tool-todo'
+            config:
+              allowParallelInProgress: false
+          - id: tool-web
+            name: '@deepseek-ai/dsh-tool-web'
+            config:
+              fetch: true
+              searchTimeoutMs: 60000
+              fetchTimeoutMs: 60000
+              # This limit also applies before HTML conversion. Let the download cap bound the page.
+              fetchMaxOutputChars: 9007199254740991
+          - id: present
+            name: '@deepseek-ai/dsh-tool-present'
+
+    - id: rulith-brain-ui
+      name: rulith-brain-ui
+    # web_search: the agent's own search provider - Wikipedia without an account or a key, or the service the user
+    # chose (the web entry above selects it)
+    - id: rulith-brain-web
+      name: rulith-brain-web

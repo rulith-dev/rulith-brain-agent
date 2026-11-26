@@ -1,0 +1,47 @@
+[package]
+name = "rulith-brain-agent"
+version = "0.2.0"
+description = "Rulith Brain Agent: the agent's page in a window of its own"
+authors = ["Victor Shaw"]
+license = "MIT"
+edition = "2021"
+rust-version = "1.77.2"
+publish = false
+autobins = false
+default-run = "rulith-brain-agent"
+
+[[bin]]
+name = "rulith-brain-agent"
+path = "rust/main.rs"
+
+[lib]
+name = "rulith_brain_agent_lib"
+path = "rust/lib.rs"
+crate-type = ["rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.6", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+tauri = { version = "2.10", default-features = false, features = ["wry", "common-controls-v6"] }
+tauri-plugin-opener = "2.5"
+tauri-plugin-single-instance = "2.3"
+tauri-plugin-updater = "2.9"
+
+[target.'cfg(windows)'.dependencies]
+rfd = { version = "0.15", default-features = false, features = ["common-controls-v6"] }
+sys-locale = "0.3"
+tokio = { version = "1", features = ["time"] }
+
+# the shell's own page from the app's assets (a release build)
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+[profile.release]
+opt-level = "s"
+lto = true
+strip = "symbols"
+codegen-units = 1
+panic = "unwind"

@@ -1,0 +1,23 @@
+{
+  "name": "rulith-memory-agent",
+  "version": "0.2.4",
+  "private": true,
+  "description": "Companion agent for the local Rulith Brain app and its memory.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "rulith-memory-agent": "start.mjs"
+  },
+  "engines": {
+    "node": ">=22.19"
+  },
+  "scripts": {
+    "start": "node start.mjs",
+    "test": "node --test \"test/*.test.mjs\"",
+    "desktop": "node tools/desktop.mjs",
+    "package": "node tools/pack.mjs"
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh": "0.2.1-alpha.1"
+  }
+}

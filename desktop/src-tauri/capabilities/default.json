@@ -1,0 +1,8 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Core access for the bundled shell page. The native update dialog needs no webview permissions.",
+  "local": true,
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}
