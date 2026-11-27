@@ -14,7 +14,8 @@
 //               written, the persona read once a conversation (its opening turn)
 //   --front, --focus-k, --focus-every   how a turn recalls; unset, the server's memory folder decides (status.recall:
 //               kv, 12 windows, chosen again every 16 steps by default)
-//   --persona   a text file read as each conversation's front before dsh's own system prompt (--system picks which go)
+//   --persona   a text file read as each conversation's front before dsh's own system prompt (--system picks which go);
+//               default brain-front.md, the agent's own; "none": no front of the agent's
 // The agent's page, http://127.0.0.1:<forwarder port>/brain, says whether Brain runs, has the switches, and shows what
 // the last answer drew on. The page carries the product's brand (rulith-brain-ui, copied into the dsh profile at every
 // start); the packaged agent (tools/pack.mjs) starts this file with its own Node through start.cmd.
@@ -77,9 +78,13 @@ if (!Number.isInteger(focusEvery) || focusEvery < 0 || focusEvery > 65536) fail(
 const systemFrom = oneOf('--system', take('--system', 'both'), ['both', 'request', 'persona']);
 const personaFile = take('--persona');
 const forwarderPort = Number(take('--forwarder-port', 0));
+// The conversation's front: unless --persona names another file (or "none"), the agent's own (brain-front.md) tells
+// the model what it works on - a memory that keeps what it reads and forgets what is used least, with no context limit
+// - so it reads long material through to the end instead of refusing for context size.
 let persona = '';
-if (personaFile) {
-  try { persona = fs.readFileSync(path.resolve(personaFile), 'utf8').trim(); } catch (error) { fail(`--persona: ${error.message}`); }
+if (personaFile !== 'none') {
+  const file = personaFile ? path.resolve(personaFile) : path.join(here, 'brain-front.md');
+  try { persona = fs.readFileSync(file, 'utf8').trim(); } catch (error) { fail(`--persona: ${error.message}`); }
 }
 function findHarness() {
   try {

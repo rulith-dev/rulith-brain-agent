@@ -10,6 +10,9 @@ another computer on your network.
   in the Agent or in Brain's Chat can draw on the same memory.
 - **Research a question.** The Agent can search Wikipedia without an account, read a web page by its address
   and use the passages it finds in its answer. You can also choose your own search service.
+- **Reads to the end.** The Agent knows its context is Brain's memory, with no length limit: everything it reads
+  stays there and related memories come back by themselves as it reads and writes. Ask it to read a whole file or
+  folder and it reads every part, continuing wherever a tool's output stops.
 - **Use a Brain anywhere on your network.** Point the Agent at Brain on this PC or on another computer, with the
   access key Brain gives you.
 - **Stay up to date.** The desktop app installs new versions when you choose to; the portable version tells you
@@ -106,6 +109,7 @@ carries it as `Authorization: Bearer <key>`. What the Agent can do with Brain, a
 | `system-proxy.mjs` | Windows' proxy setting, handed to the Agent's process. |
 | `rulith-brain-web/` | The web search (Wikipedia, a SearXNG address) as a search provider for dsh. |
 | `rulith-brain-ui/` | The page's name and mark. |
+| `brain-front.md` | What the Agent tells the model at the start of each conversation: it works on Brain's memory, with no context limit. |
 | `brain-panel.html` | Shows the connection to Brain, settings and available source passages. |
 | `memory-agent.cordis.yml` | The changes to dsh's web profile. |
 | `test/` | Agent tests and their fixtures. |

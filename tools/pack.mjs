@@ -69,7 +69,7 @@ export function legalProblems(text, name) {
   return found;
 }
 // the agent's own files, as they go into app/
-export const APP_FILES = ['start.mjs', 'capacity.mjs', 'tools/connection.mjs', 'tools/agent-update.mjs', 'memory-transport.mjs', 'brain-core.mjs', 'research-learn.mjs', 'system-proxy.mjs', 'brain-panel.html', 'memory-agent.cordis.yml',
+export const APP_FILES = ['start.mjs', 'capacity.mjs', 'tools/connection.mjs', 'tools/agent-update.mjs', 'memory-transport.mjs', 'brain-core.mjs', 'research-learn.mjs', 'system-proxy.mjs', 'brain-panel.html', 'brain-front.md', 'memory-agent.cordis.yml',
   'rulith-brain-ui', 'rulith-brain-web'];
 const DSH = '@deepseek-ai/dsh';
 // not needed to run: type declarations and source maps
