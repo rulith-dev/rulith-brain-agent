@@ -1050,6 +1050,16 @@ export class MemoryTransport {
             // 1.0: busy (the request waited its limit there) and loading wait here and go again; nothing else is cured
             // by sending it again
             if (error.code === 'busy' || error.code === 'loading' || error.code === 'turn_in_flight') { await wait(error); continue; }
+            // (11-27, the owner's session) the brain does not hold the turn these tool results answer - the requests
+            // before failed, or the model was loaded again since: it refused the request whole (nothing kept), so the
+            // transcript goes on once as one this client has not sent before, its tool results as notes
+            if (error.code === 'brain_request' && /tool continuation/i.test(error.message ?? '') && plan.thread && !reopened) {
+              reopened = 1;
+              this.threads = this.threads.filter((T) => T !== plan.thread);
+              this.log('memory: the brain does not hold the turn these tool results answer: the transcript goes on as a new conversation');
+              plan = null;
+              continue;
+            }
             throw error;
           }
           if (error.code === 'turn_mismatch' && mismatches++ < MISMATCH_TRIES) {

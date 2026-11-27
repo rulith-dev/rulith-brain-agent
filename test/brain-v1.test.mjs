@@ -121,3 +121,22 @@ test('1.0: research pages are bound to the memory by its memory_id (the app\'s p
   assert.deepEqual(await agent.observe({ messages: [u1, page, { role: 'tool', tool_call_id: 'w1', content: body }] }), []);
   assert.deepEqual([agent.state().can_learn, agent.state().why], [false, 'app_only']);
 });
+
+test('1.0: tool results the brain holds no turn for (the requests before failed, the model loaded again) go on once as a new transcript', async () => {
+  const fixture = chatFixture();
+  let refuse = 0;
+  const tr = new MemoryTransport({ server: fixture.server, fetch: async (url, init) => {
+    if (String(url).endsWith('/v1/brain/chat/completions') && JSON.parse(init.body).messages.some((m) => m.role === 'tool') && refuse++ === 0)
+      return new Response(JSON.stringify({ error: { code: 400, message: 'brain append tool continuation needs a preceding brain user turn', type: 'invalid_request_error' } }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } });
+    return fixture.fetch(url, init);
+  } });
+  const call = { role: 'assistant', content: '', tool_calls: [{ id: 'c1', type: 'function', function: { name: 'read', arguments: '{}' } }] };
+  await (await tr.send({ messages: [sys, u1] })).response.text();
+  const r = await tr.send({ messages: [sys, u1, call, { role: 'tool', tool_call_id: 'c1', content: 'chapter 3 text' }] });
+  await r.response.text();
+  assert.equal(refuse, 1);
+  // sent once more, as a transcript this client has not sent before: the tool result as a note
+  assert.deepEqual(fixture.requests.at(-1).messages.slice(1), [{ role: 'user', content: '(tool result) chapter 3 text' }]);
+  assert.equal(r.record.session, 'new');
+});
